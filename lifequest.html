@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DA</title>
+<link rel="manifest" href="data:application/json;base64,ewogICJuYW1lIjogIkRBIiwKICAic2hvcnRfbmFtZSI6ICJEQSIsCiAgInN0YXJ0X3VybCI6ICIuIiwKICAiZGlzcGxheSI6ICJzdGFuZGFsb25lIiwKICAiYmFja2dyb3VuZF9jb2xvciI6ICIjMDAwMDAwIiwKICAidGhlbWVfY29sb3IiOiAiIzAwMDAwMCIsCiAgImljb25zIjogW3sic3JjIjoiZGF0YTppbWFnZS9qcGVnO2Jhc2U2NCwiLCJzaXplcyI6IjUxMng1MTIiLCJ0eXBlIjoiaW1hZ2UvanBlZyJ9XX0=">
+<meta name="theme-color" content="#000">
+<style>
+body{background:#000;color:#fff;font-family:sans-serif;margin:0;padding:10px}
+h1{text-align:center;font-size:18px}
+.stats{display:flex;justify-content:space-between;background:#111;padding:12px;border-radius:10px}
+.barra{height:8px;background:#333;border-radius:10px;margin:10px 0}
+.progreso{height:100%;background:#FFD700}
+.dias{display:flex;overflow-x:auto;gap:15px;padding:10px 0;border-bottom:1px solid #333}
+.dia{text-align:center;min-width:60px;opacity:.5}
+.dia.activo{color:#FFD700;border-bottom:2px solid #FFD700;opacity:1}
+.habito{display:flex;align-items:center;background:#111;padding:12px;margin:10px 0;border-radius:10px}
+.check{width:24px;height:24px;border:2px solid #555;border-radius:6px;margin-right:12px}
+.check.hecho{background:#FFD700}
+.add{width:100%;padding:12px;background:#FFD700;color:#000;border:none;border-radius:10px;font-weight:bold;margin-top:10px}
+</style>
+</head>
+<body>
+<h1>DA - Misión</h1>
+<div class="stats"><div>🔥 Racha: <span id="racha">0</span></div><div id="progresoTxt">0/8</div></div>
+<div class="barra"><div class="progreso" id="barra"></div></div>
+<div class="dias" id="dias"></div>
+<div id="habitos"></div>
+<button class="add" onclick="agregar()">+ Agregar Hábito</button>
+<script>
+let h=JSON.parse(localStorage.h||'["💪 Gym","📖 Leer","💧 Agua","🧘 Meditar","📝 Estudiar","🚫 Redes","😴 Dormir","🍎 Comer bien"]');
+let d=JSON.parse(localStorage.d||'{}');let dia=new Date().toISOString().split('T')[0];
+function r(){let c=0;h.forEach((_,i)=>{if(d[dia]&&d[dia][i])c++});document.getElementById('progresoTxt').innerText=c+'/'+h.length;document.getElementById('barra').style.width=(c/h.length*100)+'%'}
+function R(){let cont=document.getElementById('habitos');cont.innerHTML='';h.forEach((x,i)=>{cont.innerHTML+=`<div class="habito" onclick="t(${i})"><div class="check ${d[dia]&&d[dia][i]?'hecho':''}"></div>${x}</div>`})}
+function t(i){d[dia]=d[dia]||[];d[dia][i]=!d[dia][i];localStorage.d=JSON.stringify(d);r();R()}
+function agregar(){let n=prompt("Hábito:");if(n){h.push(n);localStorage.h=JSON.stringify(h);r();R()}}
+r();R();
+</script>
+</body>
+</html>
