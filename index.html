@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -6,3 +5,50 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>DA</title>
 <link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#000">
+<style>
+body{background:#000;color:#fff;font-family:sans-serif;margin:0;padding:15px}
+h1{text-align:center;color:#FFD700;font-size:20px}
+.stats{display:flex;justify-content:space-between;background:#111;padding:12px;border-radius:10px;margin-bottom:10px}
+.barra{height:8px;background:#333;border-radius:10px;margin:10px 0}
+.progreso{height:100%;background:#FFD700;width:0%}
+.habito{display:flex;align-items:center;background:#111;padding:12px;margin:10px 0;border-radius:10px;cursor:pointer}
+.check{width:24px;height:24px;border:2px solid #555;border-radius:6px;margin-right:12px}
+.check.hecho{background:#FFD700;border-color:#FFD700}
+.add{width:100%;padding:14px;background:#FFD700;color:#000;border:none;border-radius:10px;font-weight:bold;font-size:16px;margin-top:10px}
+</style>
+</head>
+<body>
+<h1>DA - Misión Diaria</h1>
+<div class="stats">
+  <div>🔥 Racha: <span id="racha">0</span></div>
+  <div id="progresoTxt">0/8</div>
+</div>
+<div class="barra"><div class="progreso" id="barra"></div></div>
+<div id="habitos"></div>
+<button class="add" onclick="agregar()">+ Agregar Hábito</button>
+
+<script>
+let h=JSON.parse(localStorage.h||'["💪 Gym","📖 Leer 20min","💧 2L Agua","🧘 Meditar","📝 Estudiar","🚫 Redes","😴 Dormir 8h","🍎 Comer bien"]');
+let d=JSON.parse(localStorage.d||'{}');
+let dia=new Date().toISOString().split('T')[0];
+
+function guardar(){localStorage.h=JSON.stringify(h);localStorage.d=JSON.stringify(d)}
+function r(){
+  let c=0;h.forEach((_,i)=>{if(d[dia]&&d[dia][i])c++});
+  document.getElementById('progresoTxt').innerText=c+'/'+h.length;
+  document.getElementById('barra').style.width=(c/h.length*100)+'%';
+  document.getElementById('racha').innerText=c
+}
+function R(){
+  let cont=document.getElementById('habitos');cont.innerHTML='';
+  h.forEach((x,i)=>{
+    cont.innerHTML+=`<div class="habito" onclick="t(${i})"><div class="check ${d[dia]&&d[dia][i]?'hecho':''}"></div>${x}</div>`
+  })
+}
+function t(i){d[dia]=d[dia]||[];d[dia][i]=!d[dia][i];guardar();r();R()}
+function agregar(){let n=prompt("Nuevo hábito:");if(n){h.push(n);guardar();r();R()}}
+r();R();
+</script>
+</body>
+</html>
