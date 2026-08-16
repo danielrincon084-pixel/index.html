@@ -12,9 +12,11 @@ h1{text-align:center;color:#FFD700;font-size:20px}
 .stats{display:flex;justify-content:space-between;background:#111;padding:12px;border-radius:10px;margin-bottom:10px}
 .barra{height:8px;background:#333;border-radius:10px;margin:10px 0}
 .progreso{height:100%;background:#FFD700;width:0%}
-.habito{display:flex;align-items:center;background:#111;padding:12px;margin:10px 0;border-radius:10px;cursor:pointer}
+.habito{display:flex;align-items:center;background:#111;padding:12px;margin:10px 0;border-radius:10px;justify-content:space-between}
+.izq{display:flex;align-items:center;flex:1;cursor:pointer}
 .check{width:24px;height:24px;border:2px solid #555;border-radius:6px;margin-right:12px}
 .check.hecho{background:#FFD700;border-color:#FFD700}
+.del{background:#ff3333;color:#fff;border:none;border-radius:6px;padding:6px 10px;font-size:18px;cursor:pointer}
 .add{width:100%;padding:14px;background:#FFD700;color:#000;border:none;border-radius:10px;font-weight:bold;font-size:16px;margin-top:10px}
 </style>
 </head>
@@ -43,11 +45,21 @@ function r(){
 function R(){
   let cont=document.getElementById('habitos');cont.innerHTML='';
   h.forEach((x,i)=>{
-    cont.innerHTML+=`<div class="habito" onclick="t(${i})"><div class="check ${d[dia]&&d[dia][i]?'hecho':''}"></div>${x}</div>`
+    cont.innerHTML+=`<div class="habito">
+      <div class="izq" onclick="t(${i})">
+        <div class="check ${d[dia]&&d[dia][i]?'hecho':''}"></div>${x}
+      </div>
+      <button class="del" onclick="borrar(${i})">🗑️</button>
+    </div>`
   })
 }
 function t(i){d[dia]=d[dia]||[];d[dia][i]=!d[dia][i];guardar();r();R()}
 function agregar(){let n=prompt("Nuevo hábito:");if(n){h.push(n);guardar();r();R()}}
+function borrar(i){
+  if(confirm("¿Eliminar '"+h[i]+"'?")){
+    h.splice(i,1);guardar();r();R()
+  }
+}
 r();R();
 </script>
 </body>
