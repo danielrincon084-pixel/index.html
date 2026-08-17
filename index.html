@@ -5,18 +5,22 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>DA</title>
 </head>
-<body style="background:#000;color:#fff;padding:15px;font-family:sans-serif">
+<body style="background:#000;color:#fff;padding:15px;font-family:sans-serif;padding-bottom:100px">
 <h1 style="color:#FFD700;text-align:center">DA</h1>
 
 <div id="lista"></div>
 
-<input id="nuevo" placeholder="Escribe misión..." style="width:70%;padding:10px;background:#222;color:#fff;border:none">
-<button onclick="add()" style="width:25%;padding:10px;background:#FFD700;border:none">Agregar</button>
+<div style="position:fixed;bottom:0;left:0;width:100%;background:#000;padding:10px;display:flex;gap:5px">
+<input id="nuevo" placeholder="Escribe misión..." style="flex:1;padding:12px;background:#222;color:#fff;border:none;border-radius:8px">
+<button onclick="add()" style="padding:12px 20px;background:#FFD700;color:#000;border:none;border-radius:8px;font-weight:bold">Agregar</button>
+</div>
 
 <h3 style="color:#FFD700">Notas</h3>
 <div id="notas"></div>
-<input id="nota" placeholder="Escribe nota..." style="width:70%;padding:10px;background:#222;color:#fff;border:none">
-<button onclick="addNota()" style="width:25%;padding:10px;background:#FFD700;border:none">Enviar</button>
+<div style="display:flex;gap:5px;margin-bottom:20px">
+<input id="nota" placeholder="Escribe nota..." style="flex:1;padding:10px;background:#222;color:#fff;border:none;border-radius:8px">
+<button onclick="addNota()" style="padding:10px;background:#FFD700;color:#000;border:none;border-radius:8px">Enviar</button>
+</div>
 
 <script>
 let habitos = JSON.parse(localStorage.getItem('h')||'[]');
@@ -31,7 +35,7 @@ function save(){
 function show(){
   let html = '';
   habitos.forEach((h,i)=>{
-    html += '<div style="background:#111;margin:10px 0;padding:10px;border-radius:8px">'+h+' <button onclick="del('+i+')">X</button></div>';
+    html += '<div style="background:#111;margin:10px 0;padding:12px;border-radius:10px;display:flex;justify-content:space-between;align-items:center">'+h+' <button onclick="del('+i+')" style="background:#ff3333;color:#fff;border:none;border-radius:5px;padding:5px 10px">X</button></div>';
   });
   document.getElementById('lista').innerHTML = html;
 
@@ -45,7 +49,7 @@ function show(){
 }
 
 function add(){
-  let val = document.getElementById('nuevo').value;
+  let val = document.getElementById('nuevo').value.trim();
   if(val){
     habitos.push(val);
     document.getElementById('nuevo').value = '';
@@ -61,7 +65,7 @@ function del(i){
 }
 
 function addNota(){
-  let val = document.getElementById('nota').value;
+  let val = document.getElementById('nota').value.trim();
   if(val){
     if(!notas[hoy]) notas[hoy] = [];
     notas[hoy].push(val);
@@ -71,6 +75,7 @@ function addNota(){
   }
 }
 
+document.getElementById('nuevo').addEventListener('keypress',e=>{if(e.key==='Enter')add()});
 show();
 </script>
 </body>
