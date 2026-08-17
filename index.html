@@ -4,35 +4,60 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>DA</title>
-<link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#000">
 <style>
 body{background:#000;color:#fff;font-family:sans-serif;margin:0;padding:15px}
-h1{text-align:center;color:#FFD700;font-size:20px}
-.stats{display:flex;justify-content:space-around;background:#111;padding:12px;border-radius:10px;margin-bottom:10px;text-align:center}
-.barra{height:8px;background:#333;border-radius:10px;margin:10px 0}
-.progreso{height:100%;background:#FFD700;width:0%}
-.circulo{width:70px;height:70px;border-radius:50%;background:conic-gradient(#FFD700 0deg, #333 0deg);display:flex;align-items:center;justify-content:center;font-weight:bold;margin:10px auto}
-.habito{display:flex;align-items:center;background:#111;padding:12px;margin:10px 0;border-radius:10px;justify-content:space-between}
-.izq{display:flex;align-items:center;flex:1;cursor:pointer}
-.check{width:24px;height:24px;border:2px solid #555;border-radius:6px;margin-right:12px}
-.check.hecho{background:#FFD700;border-color:#FFD700}
-.del{background:#ff3333;color:#fff;border:none;border-radius:6px;padding:6px 10px;font-size:18px}
-.add{width:100%;padding:14px;background:#FFD700;color:#000;border:none;border-radius:10px;font-weight:bold;font-size:16px;margin:10px 0}
-.notas-box{background:#111;border:1px solid #333;border-radius:10px;padding:10px;margin-top:15px}
-.nota-item{background:#222;padding:8px;border-radius:8px;margin:8px 0;font-size:14px}
-.nota-fecha{font-size:11px;color:#aaa}
-.input-nota{display:flex;gap:8px;margin-top:10px}
-.input-nota input{flex:1;background:#222;border:1px solid #333;border-radius:8px;padding:10px;color:#fff}
-.input-nota button{background:#FFD700;color:#000;border:none;border-radius:8px;padding:10px 15px;font-weight:bold}
-.titulo{color:#FFD700;margin-top:20px;font-weight:bold}
-.comparacion{text-align:center;font-size:14px;margin-top:5px}
-.mejor{color:#4CAF50}.peor{color:#ff3333}.igual{color:#aaa}
+h1{text-align:center;color:#FFD700}
+.circulo{width:80px;height:80px;border-radius:50%;background:#333;display:flex;align-items:center;justify-content:center;font-weight:bold;margin:10px auto}
+.stats{display:flex;justify-content:space-around;background:#111;padding:12px;border-radius:10px;margin:10px 0}
+.habito{background:#111;padding:12px;margin:10px 0;border-radius:10px;display:flex;justify-content:space-between;cursor:pointer}
+.check{width:20px;height:20px;border:2px solid #555;border-radius:5px;margin-right:10px;display:inline-block}
+.check.hecho{background:#FFD700}
+.add{width:100%;padding:14px;background:#FFD700;color:#000;border:none;border-radius:10px;font-weight:bold;margin:10px 0}
+.nota{background:#222;padding:8px;border-radius:8px;margin:8px 0}
+.input-nota{display:flex;gap:8px}
+.input-nota input{flex:1;background:#222;border:none;border-radius:8px;padding:10px;color:#fff}
+.input-nota button{background:#FFD700;color:#000;border:none;border-radius:8px;padding:10px}
 </style>
 </head>
 <body>
 <h1>DA - Misión Diaria</h1>
 <div class="circulo" id="circulo">0%</div>
-<div class="comparacion" id="comparacion"></div>
-
-<div class
+<div id="comp" style="text-align:center"></div>
+<div class="stats"><div>Hoy: <span id="hoy">0</span></div><div>Ayer: <span id="ayer">0</span></div></div>
+<div id="habitos"></div>
+<button class="add" onclick="agregar()">+ Agregar Hábito</button>
+<h3 style="color:#FFD700">📝 Notas</h3>
+<div id="listaNotas"></div>
+<div class="input-nota">
+<input type="text" id="inputNota" placeholder="Escribe nota...">
+<button onclick="enviarNota()">Enviar</button>
+</div>
+<script>
+let h=JSON.parse(localStorage.h||'["Gym","Leer","Agua","Meditar"]');
+let d=JSON.parse(localStorage.d||'{}');
+let n=JSON.parse(localStorage.n||'{}');
+let dia=new Date().toISOString().split('T')[0];
+let ayer=new Date(Date.now()-86400000).toISOString().split('T')[0];
+function g(){localStorage.h=JSON.stringify(h);localStorage.d=JSON.stringify(d);localStorage.n=JSON.stringify(n)}
+function c(f){let x=0;h.forEach((_,i)=>{if(d[f]&&d[f][i])x++});return x}
+function act(){
+ let hc=c(dia),ac=c(ayer),p=Math.round(hc/h.length*100);
+ document.getElementById('hoy').innerText=hc;
+ document.getElementById('ayer').innerText=ac;
+ document.getElementById('circulo').innerText=p+'%';
+ let dif=hc-ac;
+ document.getElementById('comp').innerHTML=dif>0?`↑ +${dif} vs ayer`:dif<0?`↓ ${dif} vs ayer`:`= Igual que ayer`;
+}
+function ren(){
+ let t='';h.forEach((x,i)=>{t+=`<div class="habito" onclick="marcar(${i})"><div><span class="check ${d[dia]&&d[dia][i]?'hecho':''}"></span>${x}</div><button onclick="event.stopPropagation();borrar(${i})">🗑️</button></div>`});
+ document.getElementById('habitos').innerHTML=t;
+}
+function marcar(i){d[dia]=d[dia]||[];d[dia][i]=!d[dia][i];g();act();ren()}
+function agregar(){let x=prompt("Hábito:");if(x){h.push(x);g();act();ren()}}
+function borrar(i){if(confirm("Borrar?")){h.splice(i,1);g();act();ren()}}
+function enviarNota(){let t=document.getElementById('inputNota').value;if(!t)return;n[dia]=n[dia]||[];n[dia].push({texto:t,hora:new Date().toLocaleTimeString()});document.getElementById('inputNota').value='';g();verNotas()}
+function verNotas(){let t='';(n[dia]||[]).forEach(x=>{t+=`<div class="nota"><small>${x.hora}</small><br>${x.texto}</div>`});document.getElementById('listaNotas').innerHTML=t}
+act();ren();verNotas();
+</script>
+</body>
+</html>
