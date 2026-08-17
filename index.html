@@ -1,67 +1,77 @@
 <!DOCTYPE html>
-<html lang="es">
+<html>
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>DA</title>
 </head>
-<body style="background:#000;color:#fff;font-family:sans-serif;margin:0;padding:15px">
-<h1 style="text-align:center;color:#FFD700">DA - Misión Diaria</h1>
-<div id="circulo" style="width:80px;height:80px;border-radius:50%;background:#333;display:flex;align-items:center;justify-content:center;font-weight:bold;margin:10px auto">0%</div>
-<div id="comp" style="text-align:center;font-size:14px"></div>
-<div style="display:flex;justify-content:space-around;background:#111;padding:12px;border-radius:10px;margin:10px 0">
-  <div>Hoy: <span id="hoy">0</span></div>
-  <div>Ayer: <span id="ayer">0</span></div>
-</div>
-<div id="habitos"></div>
+<body style="background:#000;color:#fff;padding:15px;font-family:sans-serif">
+<h1 style="color:#FFD700;text-align:center">DA</h1>
 
-<div style="display:flex;gap:8px;margin:10px 0">
-  <input type="text" id="nuevoHabito" placeholder="Nueva misión..." style="flex:1;background:#222;border:none;border-radius:8px;padding:12px;color:#fff">
-  <button onclick="agregar()" style="background:#FFD700;color:#000;border:none;border-radius:8px;padding:12px;font-weight:bold">+ Agregar</button>
-</div>
+<div id="lista"></div>
 
-<h3 style="color:#FFD700">📝 Notas</h3>
-<div id="listaNotas"></div>
-<div style="display:flex;gap:8px">
-  <input type="text" id="inputNota" placeholder="Escribe nota..." style="flex:1;background:#222;border:none;border-radius:8px;padding:10px;color:#fff">
-  <button onclick="enviarNota()" style="background:#FFD700;color:#000;border:none;border-radius:8px;padding:10px">Enviar</button>
-</div>
+<input id="nuevo" placeholder="Escribe misión..." style="width:70%;padding:10px;background:#222;color:#fff;border:none">
+<button onclick="add()" style="width:25%;padding:10px;background:#FFD700;border:none">Agregar</button>
+
+<h3 style="color:#FFD700">Notas</h3>
+<div id="notas"></div>
+<input id="nota" placeholder="Escribe nota..." style="width:70%;padding:10px;background:#222;color:#fff;border:none">
+<button onclick="addNota()" style="width:25%;padding:10px;background:#FFD700;border:none">Enviar</button>
 
 <script>
-let h = ["💪 Gym","📖 Leer","💧 Agua","🧘 Meditar"];
-let d = {};
-let n = {};
-let dia = new Date().toISOString().split('T')[0];
-let ayer = new Date(Date.now()-86400000).toISOString().split('T')[0];
+let habitos = JSON.parse(localStorage.getItem('h')||'[]');
+let notas = JSON.parse(localStorage.getItem('n')||'{}');
+let hoy = new Date().toISOString().split('T')[0];
 
-if(localStorage.h) h = JSON.parse(localStorage.h);
-if(localStorage.d) d = JSON.parse(localStorage.d);
-if(localStorage.n) n = JSON.parse(localStorage.n);
-localStorage.ultimoDia = dia;
-
-function guardar(){
-  localStorage.h = JSON.stringify(h);
-  localStorage.d = JSON.stringify(d);
-  localStorage.n = JSON.stringify(n);
+function save(){
+  localStorage.setItem('h', JSON.stringify(habitos));
+  localStorage.setItem('n', JSON.stringify(notas));
 }
 
-function contar(fecha){
-  let c = 0;
-  if(!d[fecha]) return 0;
-  for(let i=0; i<h.length; i++){
-    if(d[fecha][i]) c++;
+function show(){
+  let html = '';
+  habitos.forEach((h,i)=>{
+    html += '<div style="background:#111;margin:10px 0;padding:10px;border-radius:8px">'+h+' <button onclick="del('+i+')">X</button></div>';
+  });
+  document.getElementById('lista').innerHTML = html;
+
+  let nhtml = '';
+  if(notas[hoy]){
+    notas[hoy].forEach(n=>{
+      nhtml += '<div style="background:#222;margin:5px 0;padding:8px;border-radius:5px">'+n+'</div>';
+    });
   }
-  return c;
+  document.getElementById('notas').innerHTML = nhtml;
 }
 
-function actualizar(){
-  let hc = contar(dia);
-  let ac = contar(ayer);
-  let p = h.length > 0? Math.round(hc/h.length*100) : 0;
-  document.getElementById('hoy').innerText = hc;
-  document.getElementById('ayer').innerText = ac;
-  document.getElementById('circulo').innerText = p+'%';
-  document.getElementById('circulo').style.background = `conic-gradient(#FFD700 ${p*3.6}deg, #333 ${p*3.6}deg)`;
-  let dif = hc-ac;
-  if(dif>0) document.getElementById('comp').innerHTML = '<span style="color:#4CAF50">↑ +' + dif + ' vs ayer</span>';
-  else if(dif<0) document.getElementById('comp').innerHTML = '<span style
+function add(){
+  let val = document.getElementById('nuevo').value;
+  if(val){
+    habitos.push(val);
+    document.getElementById('nuevo').value = '';
+    save();
+    show();
+  }
+}
+
+function del(i){
+  habitos.splice(i,1);
+  save();
+  show();
+}
+
+function addNota(){
+  let val = document.getElementById('nota').value;
+  if(val){
+    if(!notas[hoy]) notas[hoy] = [];
+    notas[hoy].push(val);
+    document.getElementById('nota').value = '';
+    save();
+    show();
+  }
+}
+
+show();
+</script>
+</body>
+</html>
