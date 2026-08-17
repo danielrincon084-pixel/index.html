@@ -4,60 +4,67 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>DA</title>
-<style>
-body{background:#000;color:#fff;font-family:sans-serif;margin:0;padding:15px}
-h1{text-align:center;color:#FFD700}
-.circulo{width:80px;height:80px;border-radius:50%;background:#333;display:flex;align-items:center;justify-content:center;font-weight:bold;margin:10px auto}
-.stats{display:flex;justify-content:space-around;background:#111;padding:12px;border-radius:10px;margin:10px 0}
-.habito{background:#111;padding:12px;margin:10px 0;border-radius:10px;display:flex;justify-content:space-between;cursor:pointer}
-.check{width:20px;height:20px;border:2px solid #555;border-radius:5px;margin-right:10px;display:inline-block}
-.check.hecho{background:#FFD700}
-.add{width:100%;padding:14px;background:#FFD700;color:#000;border:none;border-radius:10px;font-weight:bold;margin:10px 0}
-.nota{background:#222;padding:8px;border-radius:8px;margin:8px 0}
-.input-nota{display:flex;gap:8px}
-.input-nota input{flex:1;background:#222;border:none;border-radius:8px;padding:10px;color:#fff}
-.input-nota button{background:#FFD700;color:#000;border:none;border-radius:8px;padding:10px}
-</style>
 </head>
-<body>
-<h1>DA - Misión Diaria</h1>
-<div class="circulo" id="circulo">0%</div>
-<div id="comp" style="text-align:center"></div>
-<div class="stats"><div>Hoy: <span id="hoy">0</span></div><div>Ayer: <span id="ayer">0</span></div></div>
+<body style="background:#000;color:#fff;font-family:sans-serif;margin:0;padding:15px">
+<h1 style="text-align:center;color:#FFD700">DA - Misión Diaria</h1>
+<div id="circulo" style="width:80px;height:80px;border-radius:50%;background:#333;display:flex;align-items:center;justify-content:center;font-weight:bold;margin:10px auto">0%</div>
+<div id="comp" style="text-align:center;font-size:14px"></div>
+<div style="display:flex;justify-content:space-around;background:#111;padding:12px;border-radius:10px;margin:10px 0">
+  <div>Hoy: <span id="hoy">0</span></div>
+  <div>Ayer: <span id="ayer">0</span></div>
+</div>
 <div id="habitos"></div>
-<button class="add" onclick="agregar()">+ Agregar Hábito</button>
+<button onclick="agregar()" style="width:100%;padding:14px;background:#FFD700;color:#000;border:none;border-radius:10px;font-weight:bold;margin:10px 0">+ Agregar Hábito</button>
 <h3 style="color:#FFD700">📝 Notas</h3>
 <div id="listaNotas"></div>
-<div class="input-nota">
-<input type="text" id="inputNota" placeholder="Escribe nota...">
-<button onclick="enviarNota()">Enviar</button>
+<div style="display:flex;gap:8px">
+  <input type="text" id="inputNota" placeholder="Escribe nota..." style="flex:1;background:#222;border:none;border-radius:8px;padding:10px;color:#fff">
+  <button onclick="enviarNota()" style="background:#FFD700;color:#000;border:none;border-radius:8px;padding:10px">Enviar</button>
 </div>
+
 <script>
-let h=JSON.parse(localStorage.h||'["Gym","Leer","Agua","Meditar"]');
-let d=JSON.parse(localStorage.d||'{}');
-let n=JSON.parse(localStorage.n||'{}');
-let dia=new Date().toISOString().split('T')[0];
-let ayer=new Date(Date.now()-86400000).toISOString().split('T')[0];
-function g(){localStorage.h=JSON.stringify(h);localStorage.d=JSON.stringify(d);localStorage.n=JSON.stringify(n)}
-function c(f){let x=0;h.forEach((_,i)=>{if(d[f]&&d[f][i])x++});return x}
-function act(){
- let hc=c(dia),ac=c(ayer),p=Math.round(hc/h.length*100);
- document.getElementById('hoy').innerText=hc;
- document.getElementById('ayer').innerText=ac;
- document.getElementById('circulo').innerText=p+'%';
- let dif=hc-ac;
- document.getElementById('comp').innerHTML=dif>0?`↑ +${dif} vs ayer`:dif<0?`↓ ${dif} vs ayer`:`= Igual que ayer`;
+let h = ["💪 Gym","📖 Leer","💧 Agua","🧘 Meditar"];
+let d = {};
+let n = {};
+let dia = new Date().toISOString().split('T')[0];
+let ayer = new Date(Date.now()-86400000).toISOString().split('T')[0];
+
+// CARGAR DATOS GUARDADOS
+if(localStorage.h) h = JSON.parse(localStorage.h);
+if(localStorage.d) d = JSON.parse(localStorage.d);
+if(localStorage.n) n = JSON.parse(localStorage.n);
+
+// RESETEO AUTOMÁTICO: Si cambia el día, guarda el anterior y limpia hoy
+if(localStorage.ultimoDia && localStorage.ultimoDia!== dia){
+  console.log("Cambio de día: " + localStorage.ultimoDia + " -> " + dia);
 }
-function ren(){
- let t='';h.forEach((x,i)=>{t+=`<div class="habito" onclick="marcar(${i})"><div><span class="check ${d[dia]&&d[dia][i]?'hecho':''}"></span>${x}</div><button onclick="event.stopPropagation();borrar(${i})">🗑️</button></div>`});
- document.getElementById('habitos').innerHTML=t;
+localStorage.ultimoDia = dia;
+
+function guardar(){
+  localStorage.h = JSON.stringify(h);
+  localStorage.d = JSON.stringify(d);
+  localStorage.n = JSON.stringify(n);
 }
-function marcar(i){d[dia]=d[dia]||[];d[dia][i]=!d[dia][i];g();act();ren()}
-function agregar(){let x=prompt("Hábito:");if(x){h.push(x);g();act();ren()}}
-function borrar(i){if(confirm("Borrar?")){h.splice(i,1);g();act();ren()}}
-function enviarNota(){let t=document.getElementById('inputNota').value;if(!t)return;n[dia]=n[dia]||[];n[dia].push({texto:t,hora:new Date().toLocaleTimeString()});document.getElementById('inputNota').value='';g();verNotas()}
-function verNotas(){let t='';(n[dia]||[]).forEach(x=>{t+=`<div class="nota"><small>${x.hora}</small><br>${x.texto}</div>`});document.getElementById('listaNotas').innerHTML=t}
-act();ren();verNotas();
-</script>
-</body>
-</html>
+
+function contar(fecha){
+  let c = 0;
+  if(!d[fecha]) return 0;
+  for(let i=0; i<h.length; i++){
+    if(d[fecha][i]) c++;
+  }
+  return c;
+}
+
+function actualizar(){
+  let hc = contar(dia);
+  let ac = contar(ayer);
+  let p = h.length > 0? Math.round(hc/h.length*100) : 0;
+  document.getElementById('hoy').innerText = hc;
+  document.getElementById('ayer').innerText = ac;
+  document.getElementById('circulo').innerText = p+'%';
+  document.getElementById('circulo').style.background = `conic-gradient(#FFD700 ${p*3.6}deg, #333 ${p*3.6}deg)`;
+
+  let dif = hc-ac;
+  if(dif>0) document.getElementById('comp').innerHTML = '<span style="color:#4CAF50">↑ +' + dif + ' vs ayer</span>';
+  else if(dif<0) document.getElementById('comp').innerHTML = '<span style="color:#ff3333">↓ ' + dif + ' vs ayer</span>';
+  else document.getElementById('comp').innerHTML = '<span style="color:#aaa">= Igual
