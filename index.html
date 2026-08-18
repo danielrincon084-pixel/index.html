@@ -3,19 +3,23 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>DA</title>
+<title>DA - Misión Diaria</title>
 </head>
-<body style="background:#000;color:#fff;padding:15px;font-family:sans-serif;padding-bottom:100px">
+<body style="background:#000;color:#fff;padding:15px;font-family:sans-serif;padding-bottom:120px">
 <h1 style="color:#FFD700;text-align:center">DA</h1>
+
+<div id="stats" style="background:#111;padding:10px;border-radius:10px;margin-bottom:15px;text-align:center">
+  Hoy: <span id="hoy">0</span> | Ayer: <span id="ayer">0</span>
+</div>
 
 <div id="lista"></div>
 
-<div style="position:fixed;bottom:0;left:0;width:100%;background:#000;padding:10px;display:flex;gap:5px">
+<div style="position:fixed;bottom:60px;left:0;width:100%;background:#000;padding:10px;display:flex;gap:5px">
 <input id="nuevo" placeholder="Escribe misión..." style="flex:1;padding:12px;background:#222;color:#fff;border:none;border-radius:8px">
 <button onclick="add()" style="padding:12px 20px;background:#FFD700;color:#000;border:none;border-radius:8px;font-weight:bold">Agregar</button>
 </div>
 
-<h3 style="color:#FFD700">Notas</h3>
+<h3 style="color:#FFD700">📝 Notas</h3>
 <div id="notas"></div>
 <div style="display:flex;gap:5px;margin-bottom:20px">
 <input id="nota" placeholder="Escribe nota..." style="flex:1;padding:10px;background:#222;color:#fff;border:none;border-radius:8px">
@@ -24,20 +28,35 @@
 
 <script>
 let habitos = JSON.parse(localStorage.getItem('h')||'[]');
+let datos = JSON.parse(localStorage.getItem('d')||'{}');
 let notas = JSON.parse(localStorage.getItem('n')||'{}');
 let hoy = new Date().toISOString().split('T')[0];
+let ayer = new Date(Date.now()-86400000).toISOString().split('T')[0];
 
 function save(){
   localStorage.setItem('h', JSON.stringify(habitos));
+  localStorage.setItem('d', JSON.stringify(datos));
   localStorage.setItem('n', JSON.stringify(notas));
+}
+
+function contar(dia){
+  if(!datos[dia]) return 0;
+  return Object.values(datos[dia]).filter(x=>x).length;
 }
 
 function show(){
   let html = '';
   habitos.forEach((h,i)=>{
-    html += '<div style="background:#111;margin:10px 0;padding:12px;border-radius:10px;display:flex;justify-content:space-between;align-items:center">'+h+' <button onclick="del('+i+')" style="background:#ff3333;color:#fff;border:none;border-radius:5px;padding:5px 10px">X</button></div>';
+    let hecho = datos[hoy] && datos[hoy][i]? 'background:#FFD700;color:#000' : 'background:#111';
+    html += '<div onclick="toggle('+i+')" style="'+hecho+';margin:10px 0;padding:12px;border-radius:10px;display:flex;justify-content:space-between;align-items:center;cursor:pointer">';
+    html += '<span>'+h+'</span>';
+    html += '<button onclick="event.stopPropagation();del('+i+')" style="background:#ff3333;color:#fff;border:none;border-radius:5px;padding:5px 10px">X</button>';
+    html += '</div>';
   });
   document.getElementById('lista').innerHTML = html;
+
+  document.getElementById('hoy').innerText = contar(hoy);
+  document.getElementById('ayer').innerText = contar(ayer);
 
   let nhtml = '';
   if(notas[hoy]){
@@ -46,6 +65,13 @@ function show(){
     });
   }
   document.getElementById('notas').innerHTML = nhtml;
+}
+
+function toggle(i){
+  if(!datos[hoy]) datos[hoy] = {};
+  datos[hoy][i] =!datos[hoy][i];
+  save();
+  show();
 }
 
 function add(){
@@ -68,7 +94,8 @@ function addNota(){
   let val = document.getElementById('nota').value.trim();
   if(val){
     if(!notas[hoy]) notas[hoy] = [];
-    notas[hoy].push(val);
+    let hora = new Date().toLocaleTimeString('es-CO',{hour:'2-digit',minute:'2-digit'});
+    notas[hoy].push(hora+' - '+val);
     document.getElementById('nota').value = '';
     save();
     show();
